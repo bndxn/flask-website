@@ -26,9 +26,19 @@ def overlapping_temperature_and_humidity(df):
 
     fig.update_layout(title_text="Temperature and humidity")
 
-    # fig.update_layout(
-    # autosize=True
-    # )
+    # Update layout to move the legend above the chart
+    fig.update_layout(
+
+        legend=dict(
+            xanchor='right',
+            yanchor='top'
+        )
+    )
+
+    fig.update_layout(
+        margin=dict(l=0, r=0),  # Fill margins on the right and left
+        autosize=True  # Auto size to fit container
+     )
 
     # Set x-axis title
     fig.update_xaxes(title_text="Time")
