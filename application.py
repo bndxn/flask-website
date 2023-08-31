@@ -80,25 +80,24 @@ def blog():
 
 @application.route("/live_data")
 def live_data():
-    day_ago = str(pd.Timestamp.now() - pd.Timedelta(days=1))
 
+    # Download data for the last 24 hours
+    day_ago = str(pd.Timestamp.now() - pd.Timedelta(days=2))
     connection = ddb_connection.DynamoResource()
-
     df = ddb_connection.DynamoResource.query(connection, day_ago)
 
-    fig = graphers.overlapping_temperature_and_humidity(df)
+    fig = graphers.temperature_only(df)
 
     baseline_forecast = df["temperature"].iloc[-1]
 
     # A bodge fix, while I change to something like tensorflow-lite
-    model_forecast = baseline_forecast + 1.62
+    model_forecast = np.round(baseline_forecast + 1.62,2)
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    
     return render_template(
         "plotly.html",
         graphJSON=graphJSON,
-        header="Last day",
-        description="Temperature and humidity over the last day",
         baseline_forecast=baseline_forecast,
         model_forecast=model_forecast,
     )

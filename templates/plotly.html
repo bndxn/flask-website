@@ -2,17 +2,48 @@
 
 {% block content %}
 
-<h2>{% block title %}{{header}}{% endblock %}</h2>
-  <div>{{description}}</div>
-  <div id='chart' class='chart'></div>
+<h4>My Raspberry Pi temperature project</h4>
+  <div>This page shows the outputs of my project to record the temperature using a Raspberry Pi, and link the results up to a web page and ML model. Woohoo!
+    <br><br>
+    Readings are taken every 10 minutes using a bash script on the Pi. It is located in the sitting area of my house. 
+    <br><br>
+    I did this because I wanted to:
+    <ul>
+      <li>Build a model using data I find interesting</li>
+      <li>Collect my own primary data</li>
+      <li>Learn about AWS - DynanmoDB, Elastic Beanstalk, Sagemaker</li>
+      <li>Get more experience with UI and web development</li>
+      <li>Learn how to deploy a model</li>
+    </ul>
+
+    <h5>Live data</h5>
+  </div>
+  <div id='chart' class='chart'>
+
+  </div>
   <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
   <script type='text/javascript'>
     var graphs = {{graphJSON | safe}};
     Plotly.plot('chart',graphs,{});
   </script>
 
-  <div><h3>Forecast ahead</h3>
-    <p>Baseline:{{baseline_forecast}}C</p><br>
-    <p>Model forecast:{{model_forecast}}C (a working trained ML model (though a very inaccurate one!))</p></div>
-  
+  <div><h5>Forecast ahead</h5>
+    <p>I started collecting data in May 2023, taken every 10 minutes. At the time of writing there are over 15,000 observations.
+      <br><br>
+      Using these observations, I trained an LSTM to take as input one hour of readings, and predict the time going forward 2 hours. 
+      For example, it would take as inputs the readings at 3:00pm, 3:10pm, ..., 4:00pm, then forecast the temperature at 6pm.
+      <br><br>
+      The code for training this model is in <a href="https://github.com/bndxn/raspi-weather-station">this</a> Github repo. 
+      <br><br>
+      I previously deployed the full keras model, but this required more memory, and ended up requiring a more expensive instance. 
+      I am currently working on transforming the model to the tf-lite format, so at the moment it's a dummy forecast.  
+    </p>
+    <b>Forecasts 2 hours ahead:</b>
+    <ul>
+      <li>Persistence Baseline: {{baseline_forecast}}C</li>
+      <li>LSTM forecast: {{model_forecast}}C</li>
+    </ul>
+      
+    </div>
+    
 {% endblock %}

@@ -1,11 +1,23 @@
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import json
-import plotly
 import plotly.express as px
 import numpy as np
 
+
+def temperature_only(df):
+
+    fig = px.scatter(df, x="timestamp", y="temperature", title='Temperature over the past 48 hours')
+
+    fig.update_layout(
+        margin=dict(l=0, r=0),  # Fill margins on the right and left
+        autosize=True  # Auto size to fit container
+    )
+
+    fig.update_xaxes(title_text="")
+    fig.update_yaxes(title_text="deg C")
+
+    return fig
 
 def overlapping_temperature_and_humidity(df):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
