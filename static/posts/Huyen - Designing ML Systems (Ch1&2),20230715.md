@@ -3,41 +3,48 @@ title: Huyen - Designing ML Systems (Ch1)
 created: Feb 2023
 ---
 
-This is a really excellent book and I encourage you to go out and buy it!
 
-#### Notes on Chapter 1 - Overview of Machine Learning Systems
+### Chapter 1 - Overview of machine learning systems
 
-- What is an ML system? It includes: 
-    - business requirements
-    - interfaces
-    - data stack
-    - model monitoring
-    - infrastructure
-- ML Ops is about bringing ML into production
+Overall ML systems are about the real world contexts, and we should think about how all the components fit together. 
 
-**When to use ML?**
+- We should think about the systems within which models operate in the real world. 
+- MLOps includes deploying, monitoring, and maintaining systems
+- ML works best when you can learn patterns from lots of repetitive data
+- ML in production is about navigating stakeholder requirements, shifting data, and fast inference with low latency
+- ML different from SWE because it focuses more on data and models trained from data
 
-- ML is about learning complex patterns from existing data and then using these patterns to make predictions on unseen data
-- Zero-shot learning is a problem set up where, at test time, the model has to make prediction about observations not from classes used in training
-- For our team, where do we get the ground truth of particular tags?
-- Unseen and training data should come from similar distributions 
-- Enterprise applications might have higher accuracy but laxer latency requirements
-- But customer-facing systems might have stricter latency requirements
+#### Questions for revision: 
 
-**ML research vs production**
+- What are the relevant considerations for implementing ML?
+- When does ML work well or less well?
+- How does SWE differ from ML?
 
-- production is more about stakeholder requirements, lower latency, and shifting datasets
-    - Latency: the time between receiving a query and returning the result
-- Production data is much messier and requires more preprocessing than standardised research datasets
-- one way to deal with different objectives is to develop multiple models and combine them
-- ensemble models a good example: used in research with high accuracy but end up being too complex to use in production
-- research prioritises fast training but this might not be the same as fast inference
+### Chapter 2 - Introduction to ML Systems design
 
-**ML in the real world**
+Models should exist to support business objectives, so tie the model performance to a business outcome. There will be varying requirements, which come down to building robust and extensible systems, built iteratively. 
 
-- Fairness - rarely considered, no good metrics for fairness, and can perpetuate systemic biases
-    - Members of minority groups might be particularly affected, but this would not show up on overall scores, as minority groups only make up a small part of the evaluation metrics
-- Interpretability - mixed responses from people on whether they want more interpretable models, but users also might have a ‘right to explanation’
-- “The vast majority of ML-related jobs will be, and already are, in productionizing ML”
-- ML should learn more from SWE
-    - SWE has separation of code and data but ML is more mixed together, and requires more vigilance about the data used in training and in deployment
+### Definitions of requirements
+
+- Reliability - performing correctly even in adversity from any possible source, flagging errors. 
+- Scalability - bigger models/more users/ more models. Autoscaling avoids wasted resources.  
+- Maintainability - make set up and code shared and understandable by others, e.g. SWEs 
+- Adaptability - business requirements and data distributions can change over time 
+
+The framing and approach to a problem makes a big difference
+
+- Framing ML problems - start with a business issue, then dig in, and this might suggest an ML solution, e.g. reducing call times was bottlenecked on predicting department 
+- Some of the hardest problems are multi-class classification with high cardinality, and multi-label (varying number of labels) multi-class classification
+- Combining multiple goals - you could use composite loss, e.g. $$loss = \alpha * quality loss + \beta * engagement loss$$, but it’s probably easier to train one model for each loss and aggregate their outputs, since then you can tweak $$\alpha, \beta$$ without retraining $$score = \alpha * quality score + \beta * engagement score$$
+- Debates continue on whether large data sets or better architecture performs better - some argue lots of data creates bad learners, but most agree with Sutton’s ‘bitter lesson’
+
+#### Questions for revision: 
+
+- What should ML models optimise for?
+    - Things linked to organisational outcomes
+- Why should models be built in a maintainable way?
+    - There will probably be iterative changes, additions, expansions
+    - The code will likely be read and used by others, e.g. SWEs not ML experts
+- Does more data mean better?
+    - Sutton bitter lesson says yes, but could have inefficient learners
+    - Also depends on data quality, and shifting distributions
