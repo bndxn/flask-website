@@ -11,12 +11,10 @@ from datetime import datetime
 import yaml
 import markdown2
 from flaskext.markdown import Markdown
-
+import tflite_runtime.interpreter as tflite
 
 application = Flask(__name__)
 Markdown(application)
-
-
 
 @application.route("/")
 def index():
@@ -39,7 +37,6 @@ def get_post(post_id):
                 post_html_content = markdown2.markdown(
                     markdown_content.strip(), extras=["fenced-code-blocks"]
                 )
-
                 # Add a regex to convert _ to \_ and I think all markdown will render correctly!
 
                 post_data = {
@@ -90,8 +87,27 @@ def live_data():
 
     baseline_forecast = df["temperature"].iloc[-1]
 
-    # A bodge fix, while I change to something like tensorflow-lite
-    model_forecast = baseline_forecast + 1.62
+    # Load TFLite model and allocate tensors
+    interpreter = tflite.Interpreter(model_path="static/converted_model_fused.tflite")
+    interpreter.allocate_tensors()
+
+    # Get input and output tensors
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
+    mean = 22.981637
+    std = 2.30707
+
+    past_hour = df["temperature"].iloc[-12:]
+    past_hour -= mean
+    past_hour /= std
+
+    # tflite interpreter - https://www.tensorflow.org/api_docs/python/tf/lite/Interpreter
+    # also https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/examples/experimental_new_converter/Keras_LSTM_fusion_Codelab.ipynb 
+    interpreter.set_tensor(input_details[0]["index"], past_hour.astype('float32').reshape([1,12,1]))
+    interpreter.invoke()
+    result = interpreter.get_tensor(output_details[0]["index"])
+    model_forecast = np.round((result+mean)*std,2)
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return render_template(
