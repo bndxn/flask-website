@@ -98,7 +98,7 @@ def live_data():
     mean = 22.981637
     std = 2.30707
 
-    past_hour = df["temperature"].iloc[-12:]
+    past_hour = df["temperature"].iloc[-12:].values
     past_hour -= mean
     past_hour /= std
 
@@ -106,8 +106,8 @@ def live_data():
     # also https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/examples/experimental_new_converter/Keras_LSTM_fusion_Codelab.ipynb 
     interpreter.set_tensor(input_details[0]["index"], past_hour.astype('float32').reshape([1,12,1]))
     interpreter.invoke()
-    result = interpreter.get_tensor(output_details[0]["index"])
-    model_forecast = np.round((result+mean)*std,2)
+    result = interpreter.get_tensor(output_details[0]["index"])[0][0]
+    model_forecast = np.round((result*std)+mean,2)
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return render_template(
