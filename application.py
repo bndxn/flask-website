@@ -11,11 +11,11 @@ from datetime import datetime
 import yaml
 import markdown2
 from flaskext.markdown import Markdown
+import tflite_runtime.interpreter as tflite
 
 
 application = Flask(__name__)
 Markdown(application)
-
 
 
 @application.route("/")
