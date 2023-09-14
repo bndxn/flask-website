@@ -90,8 +90,26 @@ def live_data():
 
     baseline_forecast = df["temperature"].iloc[-1]
 
-    # A bodge fix, while I change to something like tensorflow-lite
-    model_forecast = np.round(baseline_forecast + 1.62,2)
+    # Load TFLite model and allocate tensors
+    interpreter = tflite.Interpreter(model_path="static/converted_model_fused.tflite")
+    interpreter.allocate_tensors()
+
+    # Get input and output tensors
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
+    mean = 22.981637
+    std = 2.30707
+
+    past_hour = df["temperature"].iloc[-12:].values
+    past_hour -= mean
+    past_hour /= std
+
+    # tflite interpreter - https://www.tensorflow.org/api_docs/python/tf/lite/Interpreter
+    interpreter.set_tensor(input_details[0]["index"], past_hour.astype('float32').reshape([1,12,1]))
+    interpreter.invoke()
+    result = interpreter.get_tensor(output_details[0]["index"])[0][0]
+    model_forecast = np.round((result*std)+mean,2)
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     
